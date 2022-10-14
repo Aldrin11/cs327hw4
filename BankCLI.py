@@ -10,12 +10,20 @@ from Accounts import OverdrawError, TransactionLimitError, TransactionSequenceEr
 
 logging.basicConfig(filename='bank.log', level=logging.DEBUG,
                     format='%(asctime)s|%(levelname)s|%(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+import sqlalchemy
+from sqlalchemy.orm.session import sessionmaker
+from notebook import Notebook, Base
 
 
 class BankCLI():
     def __init__(self):
-        self._bank = Bank()
-        self._selected_account = None
+        self._session = Session()
+        self._bank = self._session.query(Bank).first 
+        if not self._bank:
+            self._bank = Bank()
+            self._selected_account = None
+            self._session.add(self._bank)
+            self._session.commit()
         self._choices = {
             "1": self._open_account,
             "2": self._summary,
@@ -110,7 +118,7 @@ Enter command
             except InvalidOperation:
                 print("Please try again with a valid dollar amount.")
         try:
-            self._bank.add_account(acct_type, amt)
+            self._bank.add_account(acct_type, amt, self._session)
         except OverdrawError:
             print(
                 "This transaction could not be completed due to an insufficient account balance.")
@@ -138,6 +146,15 @@ Enter command
 
 
 if __name__ == "__main__":
+    engine = sqlalchemy.create_engine("sqlite:///notebook.db")
+
+    # Only needs to happen once. If the tables already exist this does nothing.
+    # If you change your schema (table names, column names, relationships) then
+    # you must rebuild the database
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker()
+    Session.configure(bind=engine)
     try:
         BankCLI().run()
     except Exception as e:

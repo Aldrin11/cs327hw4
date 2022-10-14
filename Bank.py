@@ -8,7 +8,7 @@ class Bank:
     def __init__(self):
         self._accounts = []
 
-    def add_account(self, acct_type, amt):
+    def add_account(self, acct_type, amt,session):
         """Creates a new Account object and adds it to this bank object. The Account will be a SavingsAccount or CheckingAccount, depending on the type given.
 
         Args:
@@ -25,6 +25,8 @@ class Bank:
         self._accounts.append(a)
 
         a.add_transaction(amt)
+        session.add(a)
+        
 
     def _generate_account_number(self):
         return len(self._accounts) + 1
