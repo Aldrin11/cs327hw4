@@ -1,0 +1,11 @@
+To Do for HW3
+
+1) create sql for bankcli
+2) ensure db works
+3) add .add and .commit to changes when needed
+
+move to next part
+
+Notes:
+1. menu.py || bankcli.py
+2. notebook.py || bank.py
